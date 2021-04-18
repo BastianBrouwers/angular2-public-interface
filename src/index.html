@@ -4,11 +4,66 @@
   <meta charset="utf-8">
   <title>Angular2PublicInterface</title>
   <base href="/">
-
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <script>
+    const APP_SERVICE_ENTRY_POINT_NAME = "AppInjectionService";
+  
+    function submitForm(event) {
+      event.preventDefault();
+
+      if(!appEntryPointExists()) {
+        console.error("Cannot inject userInput into App: window.AppInjectionService is", window[APP_SERVICE_ENTRY_POINT_NAME]);
+        return;
+      }
+
+      let userInput = document.getElementById("userInput").value;
+
+      if (!userInputIsValid(userInput)) {
+        console.error('userInput is not valid: ', {userInput});
+        return;
+      }
+
+      injectValueIntoApp(userInput);
+    }
+
+    function injectValueIntoApp(value) {
+      window[APP_SERVICE_ENTRY_POINT_NAME].zone.run(
+        () => window[APP_SERVICE_ENTRY_POINT_NAME].inject(value)
+      );
+    }
+
+    function userInputIsValid(value) {
+      if (!value || value === '' || value === undefined || value < 0) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function appEntryPointExists() {
+      return window[APP_SERVICE_ENTRY_POINT_NAME];
+    }
+  </script>
+
+  <style>
+    .injector {
+      text-align: center;
+      border-top: 4px solid white;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+  </style>
 </head>
 <body>
   <app-root></app-root>
+
+  <div class="injector">
+    <h2 class="injector__title">Inject a number value into the App</h2>
+    <form class="injector__form" onsubmit="submitForm(event)">
+      <input class="injector__input" id="userInput" type="number" name="userInput">
+      <button class="injector__btn injector__btn--submit" type="submit">Inject</button>
+    </form>
+  </div>
 </body>
 </html>
